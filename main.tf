@@ -187,9 +187,9 @@ resource "aws_instance" "webserver_instance_20240105" {
   sudo yum update -y
   sudo yum install epel-release -y
   sudo yum install nginx -y
-  curl -I 127.0.0.1
   sudo systemctl start nginx
   sudo systemctl enable nginx
+  curl -I 127.0.0.1
   EOF
 
 }
