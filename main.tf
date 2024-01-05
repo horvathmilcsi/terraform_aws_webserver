@@ -184,8 +184,9 @@ resource "aws_instance" "webserver_instance_20240105" {
 
   user_data = <<-EOF
   #!/bin/bash
-  sudo yum update
-  sudo yum install nginx
+  sudo yum update -y
+  sudo yum install epel-release -y
+  sudo yum install nginx -y
   curl -I 127.0.0.1
   sudo systemctl start nginx
   sudo systemctl enable nginx
@@ -200,3 +201,6 @@ output "instance_id" {
 output "public_ip" {
  value = aws_instance.webserver_instance_20240105.public_ip
 }
+
+#ssh -i "c:\Users\horva\Downloads\webserver_project_key_pair_20240105.pem" centos@54.237.68.18  
+#[centos@ip-10-10-1-50 ~]$ pwd
