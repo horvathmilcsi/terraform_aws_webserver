@@ -153,17 +153,24 @@ resource "aws_network_interface" "webserver_wetwork_interface_20240105" {
 */
 }
 
+#pre-8 wait before elastic IP atach
+resource "time_sleep" "wait_30s_after_instance_created" {
+  create_duration = "30s"
+  depends_on = [ aws_instance.webserver_instance_20240105 ]  
+}
+
 #8 create an elastic IP
 
 resource "aws_eip" "webserver_eip_20240105" {
   domain = "vpc"
   network_interface = aws_network_interface.webserver_wetwork_interface_20240105.id
   associate_with_private_ip = "10.10.1.50"
-  depends_on = [ aws_internet_gateway.gw ]
+  depends_on = [ aws_internet_gateway.gw, time_sleep.wait_30s_after_instance_created ]
   tags = {
     Name = "webserver_eip_20240105"
   }
 }
+
 
 #9 create Centos server and install nginx
 # The EC2 instance will be defaulted in region us-east-1 and from the most recent amazon-linux2 official image.
@@ -182,14 +189,19 @@ resource "aws_instance" "webserver_instance_20240105" {
     name = "webserver_instance_20240105"
   }
 
-  user_data = <<-EOF
+  user_data = <<EOF
   #!/bin/bash
+  touch a1.txt
   sudo yum update -y
+  touch a2.txt
   sudo yum install epel-release -y
+  touch a3.txt
   sudo yum install nginx -y
+  touch a4.txt
   sudo systemctl start nginx
+  touch a5.txt
   sudo systemctl enable nginx
-  curl -I 127.0.0.1
+  touch a6.txt
   EOF
 
 }
@@ -198,8 +210,12 @@ output "instance_id" {
  value = aws_instance.webserver_instance_20240105.id
 }
 
-output "public_ip" {
+output "public_ec2_ip" {
  value = aws_instance.webserver_instance_20240105.public_ip
+}
+
+output "public_eip_ip" {
+  value = aws_eip.webserver_eip_20240105.public_ip
 }
 
 #ssh -i "c:\Users\horva\Downloads\webserver_project_key_pair_20240105.pem" centos@54.237.68.18  
